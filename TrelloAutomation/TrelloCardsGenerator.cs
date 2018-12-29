@@ -10,15 +10,15 @@ using System.Threading;
 using Manatee.Trello;
 using System.Threading.Tasks;
 
-namespace CSV_to_Trello
+namespace TrelloAutomation
 {
     class TrelloCardsGenerator
     {
         static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
-        static string ApplicationName = "Google Sheets API .NET Quickstart";
-        private String organizationId;
-        private String googleSpreadSheetId;
-        private String googleSpreadSheetRange;
+        static string ApplicationName = "Google Sheets API .NET Quickstart"; // TODO add to app.config
+        private string organizationId;
+        private string googleSpreadSheetId;
+        private string googleSpreadSheetRange;
         private Organization org;
 
         static void Main(string[] args)
@@ -32,36 +32,36 @@ namespace CSV_to_Trello
 
         }
 
-        private async Task<IBoard> CreateBoard(Organization org, String boardName)
+        private async Task<IBoard> CreateBoard(Organization org, string boardName)
         {
             var boardTask = await org.Boards.Add(boardName);
             return boardTask;
         }
 
-        private async Task<IList> AddList(IBoard board, String listName)
+        private async Task<IList> AddList(IBoard board, string listName)
         {
             var listTask = await board.Lists.Add(listName);
             return listTask;
         }
 
-        private List<Member> CreateMemberList(String membersString)
+        private List<Member> CreateMemberList(string membersstring)
         {
             var memberList = new List<Member>();
-            String[] members = membersString.Split(';');
-            foreach (String memberString in members)
+            string[] members = membersstring.Split(';');
+            foreach (string memberstring in members)
             {
-                var member = new Member(membersString);
+                var member = new Member(membersstring);
                 memberList.Add(member);
             }
             return memberList;
         }
 
-        private async Task AddLabel(ICard card, String labelName, LabelColor colour)
+        private async Task AddLabel(ICard card, string labelName, LabelColor colour)
         {
             await card.Board.Labels.Add(labelName, colour);
         }
 
-        private async Task AddChecklist(ICard card, String checklistName)
+        private async Task AddChecklist(ICard card, string checklistName)
         {
             await card.CheckLists.Add(checklistName);
         }
@@ -85,6 +85,7 @@ namespace CSV_to_Trello
             googleSpreadSheetId = Console.ReadLine(); ;
             Console.WriteLine("Enter the Range:");
             // Example "A1:H2"
+            // TODO: Remove range input
             googleSpreadSheetRange = Console.ReadLine(); ;
         }
 
@@ -94,14 +95,13 @@ namespace CSV_to_Trello
             using (var stream =
                 new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
             {
-                string credPath = "token.json";
+                string googleCredentialsFilePath = "token.json"; // TODO add to app.config
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
                     Scopes,
                     "user",
                     CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-                Console.WriteLine("Credential file saved to: " + credPath);
+                    new FileDataStore(googleCredentialsFilePath, true)).Result;
             }
 
             // Create Google Sheets API service.
@@ -123,17 +123,17 @@ namespace CSV_to_Trello
                 {
                     IBoard board = null;
                     IList list = null;
-                    String title = null;
-                    String description = null;
+                    string title = null;
+                    string description = null;
                     List<Member> memberList = null;
                     ICard card = null;
-                    //DateTime dueDate;
                     int count = 0;
                     foreach (var cell in row)
                     {
+                        string cellValue = cell.ToString();
                         if (readHeader == false)
                         {
-                            keyList.Add(cell.ToString());
+                            keyList.Add(cellValue);
                         }
                         else
                         {
@@ -141,29 +141,29 @@ namespace CSV_to_Trello
                             {
                                 case "Board":
                                     Console.WriteLine("Creating new Board..........................");
-                                    board = await CreateBoard(org, cell.ToString());
+                                    board = await CreateBoard(org, cellValue);
                                     break;
                                 case "List":
                                     Console.WriteLine("Adding new List..........................");
                                     if (board != null)
                                     {
                                         await board.Lists.Refresh();
-                                        list = await AddList(board, cell.ToString());
+                                        list = await AddList(board, cellValue);
                                     }
                                     break;
                                 case "Title":
                                     Console.WriteLine("Adding Titile to the card..........................");
-                                    title = cell.ToString();
+                                    title = cellValue;
                                     card = await list.Cards.Add(title);
                                     break;
                                 case "Description":
                                     Console.WriteLine("Adding description to the card..........................");
-                                    description = cell.ToString();
+                                    description = cellValue;
                                     card.Description = description;
                                     break;
                                 case "Member":
                                     Console.WriteLine("Adding member list to the card..........................");
-                                    memberList = CreateMemberList(cell.ToString());
+                                    memberList = CreateMemberList(cellValue);
                                     foreach (Member member in memberList)
                                     {
                                         await card.Members.Add(member);
@@ -171,20 +171,19 @@ namespace CSV_to_Trello
                                     break;
                                 case "DueDate":
                                     Console.WriteLine("Creating new Card..........................");
-                                    card.DueDate = DateTime.Parse(cell.ToString());
+                                    card.DueDate = DateTime.Parse(cellValue);
                                     break;
                                 case "Labels":
-                                    await AddLabel(card, "Urgent", LabelColor.Red);
+                                    await AddLabel(card, cellValue, LabelColor.Red);
                                     break;
                                 case "Checklist":
-                                    await AddChecklist(card, "spraying");
+                                    await AddChecklist(card, cellValue);
                                     break;
                                 default:
                                     break;
                             }
                         }
                         count++;
-
                     }
                     count = 0;
                     readHeader = true;
