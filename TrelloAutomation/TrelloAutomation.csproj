@@ -92,8 +92,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GoogleSpreadSheetDetails.cs" />
+    <Compile Include="GoogleSpreadSheetReader.cs" />
     <Compile Include="TrelloCardsGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrelloCredentials.cs" />
+    <Compile Include="TrelloOperator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
