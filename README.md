@@ -11,4 +11,6 @@ Sample CSV file:
 
 Board,List,Title,Description,Member,Labels,Checklist,Due Date
 
-Treen Brook Farm (1918-19),December,Spraying Pesticide (All Blocks),Spray (Insecticide) on all Blocks Using (machinery) using (Gear) at Pressure of 120 psi. Rate 120l/ha. ,Bernard Cousin,Urgent,Spraying,2018/12/21
+Treen Brook Farm (1918-19),December,Spraying Pesticide (All Blocks),Spray (Insecticide) on all Blocks Using (machinery) using (Gear) at Pressure of 120 psi. Rate 120l/ha. , <userID> ,Urgent,Spraying,2018/12/21
+       
+The order of columns should be from generic to specific
